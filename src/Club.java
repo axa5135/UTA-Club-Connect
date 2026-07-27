@@ -10,12 +10,12 @@ public class Club {
     Club(String clubName, String clubCategory, int clubMembers,
          String clubDescription, String clubContactEmail, String clubMeetingTime)
     {
-       name = clubName;
-       category = clubCategory;
-       members = clubMembers;
-       description = clubDescription;
-       contactEmail = clubContactEmail;
-       meetingTime = clubMeetingTime;
+        name = clubName;
+        category = clubCategory;
+        members = clubMembers;
+        description = clubDescription;
+        contactEmail = clubContactEmail;
+        meetingTime = clubMeetingTime;
     }
 
 
@@ -42,5 +42,21 @@ public class Club {
     {
         return contactEmail;
     }
+
+    String getDescription()
+    {
+        return description;
+    }
+
+    String getMeetingTime()
+    {
+        return meetingTime;
+    }
+
+    int getMembers()
+    {
+        return members;
+    }
+
 }
-//nhjjhgjyg
+

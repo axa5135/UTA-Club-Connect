@@ -46,4 +46,19 @@ public class Event {
     {
         rsvpCount = rsvpCount + 1;
     }
+
+    String getDate()
+    {
+        return date;
+    }
+
+    String getLocation()
+    {
+        return location;
+    }
+
+    String getDescription()
+    {
+        return description;
+    }
 }

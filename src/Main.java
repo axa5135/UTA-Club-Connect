@@ -16,6 +16,18 @@ public class Main
         // entering available events
         loadEvents(events);
 
+        try
+        {
+            WebsiteServer website = new WebsiteServer(8080, clubs, events);
+            website.start();
+        }
+        catch (Exception error)
+        {
+            System.out.println("Website could not start.");
+        }
+
+
+
         while (running)
         {
 
@@ -29,7 +41,7 @@ public class Main
             //printing all clubs
             if (choice == 1)
             {
-               showAllClubs(clubs);
+                showAllClubs(clubs);
             }
 
             // searching club by name
@@ -360,4 +372,3 @@ public class Main
 
     }
 }
-// wtf i cant commit changes
