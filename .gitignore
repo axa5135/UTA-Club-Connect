@@ -21,3 +21,6 @@ club_connect.db
 
 ### Mac OS ###
 .DS_Store
+
+target/
+club_connect.db
