@@ -2,12 +2,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.uta</groupId>
     <artifactId>club-connect</artifactId>
     <version>1.0</version>
-    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -16,11 +16,10 @@
     </properties>
 
     <dependencies>
-        <!-- Lets us talk to a local SQLite database file with plain JDBC -->
         <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.53.2.0</version>
+            <groupId>com.google.firebase</groupId>
+            <artifactId>firebase-admin</artifactId>
+            <version>9.4.3</version>
         </dependency>
     </dependencies>
 
@@ -39,4 +38,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

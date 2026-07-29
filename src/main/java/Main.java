@@ -1,5 +1,3 @@
-package main.java;
-
 import java.sql.SQLException;
 import java.util.List;
 

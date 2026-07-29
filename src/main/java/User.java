@@ -1,5 +1,3 @@
-package main.java;
-
 public class User {
     public static final int LEVEL_STUDENT = 1;
     public static final int LEVEL_CLUB_PRESIDENT = 2;
