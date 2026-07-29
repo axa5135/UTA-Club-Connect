@@ -1,5 +1,3 @@
-package main.java;
-
 import java.sql.SQLException;
 import java.util.List;
 
@@ -52,7 +50,7 @@ public class Main
     // Only runs the very first time - if the database already has data, this does nothing,
     // so restarting the app never wipes out anything the team has added.
     public static void seedDataIfEmpty(UserRepository userRepository, ClubRepository clubRepository,
-                                       EventRepository eventRepository) throws SQLException
+                                        EventRepository eventRepository) throws SQLException
     {
         if (userRepository.usernameExists("staff_admin"))
         {

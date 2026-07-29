@@ -1,5 +1,3 @@
-package main.java;
-
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -25,7 +23,7 @@ public class WebsiteServer {
     private SessionManager sessionManager;
 
     public WebsiteServer(int port, ClubRepository clubRepository, EventRepository eventRepository,
-                         UserRepository userRepository, SessionManager sessionManager) throws IOException {
+                          UserRepository userRepository, SessionManager sessionManager) throws IOException {
         this.clubRepository = clubRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
