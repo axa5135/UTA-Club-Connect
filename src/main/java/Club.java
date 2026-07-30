@@ -10,11 +10,18 @@ public class Club {
     private int members;
     private String ownerUsername;
     private boolean autoApproveMembers;
+    private String imageUrl;
 
     public Club(int id, String name, List<String> categories, int members,
                 String description, String contactEmail, String meetingTime, String ownerUsername,
-                boolean autoApproveMembers)
-    {
+                boolean autoApproveMembers) {
+        this(id, name, categories, members, description, contactEmail, meetingTime,
+                ownerUsername, autoApproveMembers, "");
+    }
+
+    public Club(int id, String name, List<String> categories, int members,
+                String description, String contactEmail, String meetingTime, String ownerUsername,
+                boolean autoApproveMembers, String imageUrl) {
         this.id = id;
         this.name = name;
         this.categories = categories;
@@ -24,9 +31,10 @@ public class Club {
         this.meetingTime = meetingTime;
         this.ownerUsername = ownerUsername;
         this.autoApproveMembers = autoApproveMembers;
+        this.imageUrl = imageUrl == null ? "" : imageUrl;
     }
 
-    void printInfo(){
+    void printInfo() {
         System.out.println("Club Name: " + name);
         System.out.println("Categories: " + getCategoriesText());
         System.out.println("Members: " + members);
@@ -36,70 +44,29 @@ public class Club {
         System.out.println("Owner: " + ownerUsername);
     }
 
-    public int getId()
-    {
-        return id;
-    }
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public List<String> getCategories() { return categories; }
+    public String getCategoriesText() { return String.join(", ", categories); }
 
-    public String getName()
-    {
-        return name;
-    }
-
-    public List<String> getCategories()
-    {
-        return categories;
-    }
-
-    public String getCategoriesText()
-    {
-        return String.join(", ", categories);
-    }
-
-    public boolean hasCategory(String tag)
-    {
-        for (String category : categories)
-        {
-            if (category.equalsIgnoreCase(tag))
-            {
+    public boolean hasCategory(String tag) {
+        for (String category : categories) {
+            if (category.equalsIgnoreCase(tag)) {
                 return true;
             }
         }
         return false;
     }
 
-    public String getContactEmail()
-    {
-        return contactEmail;
-    }
+    public String getContactEmail() { return contactEmail; }
+    public String getDescription() { return description; }
+    public String getMeetingTime() { return meetingTime; }
+    public int getMembers() { return members; }
+    public String getOwnerUsername() { return ownerUsername; }
+    public boolean isAutoApproveMembers() { return autoApproveMembers; }
+    public String getImageUrl() { return imageUrl; }
 
-    public String getDescription()
-    {
-        return description;
-    }
-
-    public String getMeetingTime()
-    {
-        return meetingTime;
-    }
-
-    public int getMembers()
-    {
-        return members;
-    }
-
-    public String getOwnerUsername()
-    {
-        return ownerUsername;
-    }
-
-    public boolean isAutoApproveMembers()
-    {
-        return autoApproveMembers;
-    }
-
-    public boolean isOwnedBy(String username)
-    {
+    public boolean isOwnedBy(String username) {
         return ownerUsername != null && username != null && ownerUsername.equalsIgnoreCase(username);
     }
 }

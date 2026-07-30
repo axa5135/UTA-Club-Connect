@@ -13,29 +13,17 @@ public class User {
         this.role = role;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public int getRole() {
-        return role;
-    }
+    public String getUsername() { return username; }
+    public String getPasswordHash() { return passwordHash; }
+    public int getRole() { return role; }
 
     public boolean isAtLeast(int minimumRole) {
         return role >= minimumRole;
     }
 
     public String getRoleName() {
-        if (role == LEVEL_UTA_STAFF) {
-            return "UTA Staff";
-        }
-        if (role == LEVEL_CLUB_PRESIDENT) {
-            return "Club President";
-        }
-        return "Student";
+        if (role == LEVEL_UTA_STAFF) return "Admin";
+        if (role == LEVEL_CLUB_PRESIDENT) return "Club Leader";
+        return "Member";
     }
 }
