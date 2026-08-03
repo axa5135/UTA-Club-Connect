@@ -24,7 +24,7 @@ public class WebsiteServer {
     private SessionManager sessionManager;
 
     public WebsiteServer(int port, ClubRepository clubRepository, EventRepository eventRepository,
-                         UserRepository userRepository, SessionManager sessionManager) throws IOException {
+            UserRepository userRepository, SessionManager sessionManager) throws IOException {
         this.clubRepository = clubRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
@@ -64,11 +64,13 @@ public class WebsiteServer {
 
     private String getCookieValue(HttpExchange exchange, String name) {
         List<String> cookieHeaders = exchange.getRequestHeaders().get("Cookie");
-        if (cookieHeaders == null) return null;
+        if (cookieHeaders == null)
+            return null;
         for (String header : cookieHeaders) {
             for (String part : header.split(";")) {
                 String[] pieces = part.trim().split("=", 2);
-                if (pieces.length == 2 && pieces[0].equals(name)) return pieces[1];
+                if (pieces.length == 2 && pieces[0].equals(name))
+                    return pieces[1];
             }
         }
         return null;
@@ -77,7 +79,8 @@ public class WebsiteServer {
     private User getCurrentUser(HttpExchange exchange) throws SQLException {
         String token = getCookieValue(exchange, "session");
         String username = sessionManager.getUsername(token);
-        if (username == null) return null;
+        if (username == null)
+            return null;
         return userRepository.findByUsername(username);
     }
 
@@ -103,7 +106,10 @@ public class WebsiteServer {
             } catch (SQLException e) {
                 throw new IOException(e);
             }
-            sendHtml(exchange, wrapPage("Login", null, "<h1>Login</h1><div class='card'><p class='error'>Incorrect username or password.</p>" + loginForm() + "</div>"));
+            sendHtml(exchange,
+                    wrapPage("Login", null,
+                            "<h1>Login</h1><div class='card'><p class='error'>Incorrect username or password.</p>"
+                                    + loginForm() + "</div>"));
             return;
         }
         sendHtml(exchange, wrapPage("Login", null, "<h1>Login</h1>" + loginForm()));
@@ -125,11 +131,15 @@ public class WebsiteServer {
             String password = getFirstValue(formData, "password");
             try {
                 if (username.isEmpty() || password.isEmpty()) {
-                    sendHtml(exchange, wrapPage("Register", null, "<h1>Register</h1><p class='error'>Username and password are required.</p>" + registerForm()));
+                    sendHtml(exchange,
+                            wrapPage("Register", null,
+                                    "<h1>Register</h1><p class='error'>Username and password are required.</p>"
+                                            + registerForm()));
                     return;
                 }
                 if (userRepository.usernameExists(username)) {
-                    sendHtml(exchange, wrapPage("Register", null, "<h1>Register</h1><p class='error'>That username is already taken.</p>" + registerForm()));
+                    sendHtml(exchange, wrapPage("Register", null,
+                            "<h1>Register</h1><p class='error'>That username is already taken.</p>" + registerForm()));
                     return;
                 }
                 userRepository.createUser(username, password, User.LEVEL_STUDENT);
@@ -208,7 +218,8 @@ public class WebsiteServer {
 
             String heroStyle = heroImage.isBlank()
                     ? ""
-                    : " style=\"background-image: linear-gradient(rgba(15, 48, 80, .70), rgba(15, 48, 80, .70)), url('" + escapeAttribute(heroImage) + "');\"";
+                    : " style=\"background-image: linear-gradient(rgba(15, 48, 80, .70), rgba(15, 48, 80, .70)), url('"
+                            + escapeAttribute(heroImage) + "');\"";
 
             StringBuilder body = new StringBuilder();
             body.append("<section class='hero'" + heroStyle + ">")
@@ -218,15 +229,20 @@ public class WebsiteServer {
                     .append("<input type='text' name='q' placeholder='Search clubs, events, categories, or meeting dates'>")
                     .append("<button type='submit'>Search</button>")
                     .append("</form>")
-                    .append("<p class='tiny-counts'>").append(clubs.size()).append(" clubs • ").append(events.size()).append(" events</p>")
+                    .append("<p class='tiny-counts'>").append(clubs.size()).append(" clubs • ").append(events.size())
+                    .append(" events</p>")
                     .append("</div></section>");
 
-            body.append("<section class='home-section'><div class='section-header'><h2>Explore Clubs</h2><a href='/clubs'>View all</a></div><div class='scroll-row'>");
-            for (Club club : clubs) body.append(homeClubCard(club));
+            body.append(
+                    "<section class='home-section'><div class='section-header'><h2>Explore Clubs</h2><a href='/clubs'>View all</a></div><div class='scroll-row'>");
+            for (Club club : clubs)
+                body.append(homeClubCard(club));
             body.append("</div></section>");
 
-            body.append("<section class='home-section'><div class='section-header'><h2>Upcoming Events</h2><a href='/events'>View all</a></div><div class='scroll-row'>");
-            for (Event event : events) body.append(homeEventCard(event));
+            body.append(
+                    "<section class='home-section'><div class='section-header'><h2>Upcoming Events</h2><a href='/events'>View all</a></div><div class='scroll-row'>");
+            for (Event event : events)
+                body.append(homeEventCard(event));
             body.append("</div></section>");
 
             sendHtml(exchange, wrapPage("UTA Club Connect", currentUser, body.toString()));
@@ -236,7 +252,9 @@ public class WebsiteServer {
     }
 
     private String homeClubCard(Club club) {
-        String image = club.getImageUrl().isBlank() ? "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=900&q=80" : club.getImageUrl();
+        String image = club.getImageUrl().isBlank()
+                ? "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=900&q=80"
+                : club.getImageUrl();
         return "<a class='media-card' href='/club?id=" + club.getId() + "'>"
                 + "<img src='" + escapeAttribute(image) + "' alt='Club image'>"
                 + "<div><h3>" + escape(club.getName()) + "</h3>"
@@ -245,7 +263,9 @@ public class WebsiteServer {
     }
 
     private String homeEventCard(Event event) {
-        String image = event.getImageUrl().isBlank() ? "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=900&q=80" : event.getImageUrl();
+        String image = event.getImageUrl().isBlank()
+                ? "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=900&q=80"
+                : event.getImageUrl();
         return "<div class='media-card'>"
                 + "<img src='" + escapeAttribute(image) + "' alt='Event image'>"
                 + "<div><h3>" + escape(event.getTitle()) + "</h3>"
@@ -257,7 +277,8 @@ public class WebsiteServer {
         try {
             User currentUser = getCurrentUser(exchange);
             StringBuilder html = new StringBuilder("<h1>Clubs</h1><div class='grid'>");
-            for (Club club : clubRepository.getAllClubs()) html.append(buildClubCard(club, currentUser));
+            for (Club club : clubRepository.getAllClubs())
+                html.append(buildClubCard(club, currentUser));
             html.append("</div>");
             sendHtml(exchange, wrapPage("Clubs", currentUser, html.toString()));
         } catch (SQLException e) {
@@ -271,10 +292,12 @@ public class WebsiteServer {
             int id = getIntParam(exchange, "id", -1);
             Club club = clubRepository.getClubById(id);
             if (club == null) {
-                sendHtml(exchange, wrapPage("Club Not Found", currentUser, "<div class='card'><p>That club does not exist.</p></div>"));
+                sendHtml(exchange, wrapPage("Club Not Found", currentUser,
+                        "<div class='card'><p>That club does not exist.</p></div>"));
                 return;
             }
-            sendHtml(exchange, wrapPage(club.getName(), currentUser, "<h1>" + escape(club.getName()) + "</h1>" + buildClubCard(club, currentUser)));
+            sendHtml(exchange, wrapPage(club.getName(), currentUser,
+                    "<h1>" + escape(club.getName()) + "</h1>" + buildClubCard(club, currentUser)));
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -284,12 +307,15 @@ public class WebsiteServer {
         boolean isStaff = currentUser != null && currentUser.isAtLeast(User.LEVEL_UTA_STAFF);
         boolean isOwner = currentUser != null && club.isOwnedBy(currentUser.getUsername());
         boolean canManage = isStaff || isOwner;
-        String image = club.getImageUrl().isBlank() ? "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=900&q=80" : club.getImageUrl();
+        String image = club.getImageUrl().isBlank()
+                ? "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=900&q=80"
+                : club.getImageUrl();
 
         StringBuilder card = new StringBuilder();
         card.append("<div class='card club-card'>")
                 .append("<img class='card-img' src='").append(escapeAttribute(image)).append("' alt='Club image'>")
-                .append("<h2><a href='/club?id=").append(club.getId()).append("'>").append(escape(club.getName())).append("</a></h2>")
+                .append("<h2><a href='/club?id=").append(club.getId()).append("'>").append(escape(club.getName()))
+                .append("</a></h2>")
                 .append("<p><b>Category:</b> ").append(escape(club.getCategoriesText())).append("</p>")
                 .append("<p><b>Meeting:</b> ").append(escape(club.getMeetingTime())).append("</p>")
                 .append("<p><b>Contact:</b> ").append(escape(club.getContactEmail())).append("</p>")
@@ -318,9 +344,11 @@ public class WebsiteServer {
         }
 
         if (canManage) {
-            card.append("<div class='tools'><a href='/edit-club?id=").append(club.getId()).append("'>Edit Club / Picture</a>");
+            card.append("<div class='tools'><a href='/edit-club?id=").append(club.getId())
+                    .append("'>Edit Club / Picture</a>");
             if (isStaff) {
-                card.append("<form style='display:inline' action='/delete-club' method='post' onsubmit=\"return confirm('Delete this club?');\">")
+                card.append(
+                        "<form style='display:inline' action='/delete-club' method='post' onsubmit=\"return confirm('Delete this club?');\">")
                         .append("<input type='hidden' name='id' value='").append(club.getId()).append("'>")
                         .append("<button class='danger' type='submit'>Delete</button></form>");
             }
@@ -334,7 +362,8 @@ public class WebsiteServer {
         try {
             User currentUser = getCurrentUser(exchange);
             StringBuilder html = new StringBuilder("<h1>Events</h1><div class='grid'>");
-            for (Event event : eventRepository.getAllEvents()) html.append(buildEventCard(event, currentUser));
+            for (Event event : eventRepository.getAllEvents())
+                html.append(buildEventCard(event, currentUser));
             html.append("</div>");
             sendHtml(exchange, wrapPage("Events", currentUser, html.toString()));
         } catch (SQLException e) {
@@ -348,9 +377,12 @@ public class WebsiteServer {
         boolean canEditImage = false;
         if (currentUser != null) {
             Club club = clubRepository.getClubById(event.getClubId());
-            canEditImage = currentUser.isAtLeast(User.LEVEL_UTA_STAFF) || (club != null && club.isOwnedBy(currentUser.getUsername()));
+            canEditImage = currentUser.isAtLeast(User.LEVEL_UTA_STAFF)
+                    || (club != null && club.isOwnedBy(currentUser.getUsername()));
         }
-        String image = event.getImageUrl().isBlank() ? "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=900&q=80" : event.getImageUrl();
+        String image = event.getImageUrl().isBlank()
+                ? "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=900&q=80"
+                : event.getImageUrl();
 
         StringBuilder card = new StringBuilder();
         card.append("<div class='card event-card'>")
@@ -361,8 +393,10 @@ public class WebsiteServer {
                 .append("<p><b>Location:</b> ").append(escape(event.getLocation())).append("</p>")
                 .append("<p>").append(escape(event.getDescription())).append("</p>");
 
-        if (!event.getContactEmail().isBlank()) card.append("<p><b>Contact:</b> ").append(escape(event.getContactEmail())).append("</p>");
-        card.append(event.hasCapacity() ? "<p><b>RSVPs:</b> " + rsvpCount + " / " + event.getRsvpCapacity() + "</p>" : "<p><b>RSVP Count:</b> " + rsvpCount + "</p>");
+        if (!event.getContactEmail().isBlank())
+            card.append("<p><b>Contact:</b> ").append(escape(event.getContactEmail())).append("</p>");
+        card.append(event.hasCapacity() ? "<p><b>RSVPs:</b> " + rsvpCount + " / " + event.getRsvpCapacity() + "</p>"
+                : "<p><b>RSVP Count:</b> " + rsvpCount + "</p>");
 
         if (currentUser == null) {
             card.append("<p><a href='/login'>Log in to RSVP</a></p>");
@@ -377,7 +411,8 @@ public class WebsiteServer {
         }
 
         if (canEditImage) {
-            card.append("<div class='tools'><a href='/event-image?id=").append(event.getId()).append("'>Change Event Picture</a></div>");
+            card.append("<div class='tools'><a href='/event-image?id=").append(event.getId())
+                    .append("'>Change Event Picture</a></div>");
         }
         card.append("</div>");
         return card.toString();
@@ -387,11 +422,13 @@ public class WebsiteServer {
         try {
             User currentUser = getCurrentUser(exchange);
             String searchText = getQueryParam(exchange, "q");
-            if (searchText.isBlank()) searchText = getQueryParam(exchange, "clubName");
+            if (searchText.isBlank())
+                searchText = getQueryParam(exchange, "clubName");
 
             StringBuilder html = new StringBuilder();
             html.append("<h1>Search</h1><div class='card'><form action='/search' method='get'>")
-                    .append("<input type='text' name='q' value='").append(escapeAttribute(searchText)).append("' placeholder='Search clubs, events, categories, or dates'>")
+                    .append("<input type='text' name='q' value='").append(escapeAttribute(searchText))
+                    .append("' placeholder='Search clubs, events, categories, or dates'>")
                     .append("<button type='submit'>Search</button></form></div>");
 
             if (!searchText.isBlank()) {
@@ -407,7 +444,8 @@ public class WebsiteServer {
                         foundClub = true;
                     }
                 }
-                if (!foundClub) html.append("<p>No clubs found.</p>");
+                if (!foundClub)
+                    html.append("<p>No clubs found.</p>");
                 html.append("</div><h2>Events</h2><div class='grid'>");
                 boolean foundEvent = false;
                 for (Event event : eventRepository.getAllEvents()) {
@@ -420,7 +458,8 @@ public class WebsiteServer {
                         foundEvent = true;
                     }
                 }
-                if (!foundEvent) html.append("<p>No events found.</p>");
+                if (!foundEvent)
+                    html.append("<p>No events found.</p>");
                 html.append("</div>");
             }
             sendHtml(exchange, wrapPage("Search", currentUser, html.toString()));
@@ -436,14 +475,18 @@ public class WebsiteServer {
             StringBuilder options = new StringBuilder("<option value=''>Select category</option>");
             for (String tag : Tags.ALL_TAGS) {
                 String selected = tag.equals(selectedTag) ? " selected" : "";
-                options.append("<option value='").append(escapeAttribute(tag)).append("'").append(selected).append(">").append(escape(tag)).append("</option>");
+                options.append("<option value='").append(escapeAttribute(tag)).append("'").append(selected).append(">")
+                        .append(escape(tag)).append("</option>");
             }
 
-            StringBuilder html = new StringBuilder("<h1>Categories</h1><div class='card'><form action='/categories' method='get'>")
-                    .append("<select name='category'>").append(options).append("</select><button type='submit'>Filter</button></form></div><div class='grid'>");
+            StringBuilder html = new StringBuilder(
+                    "<h1>Categories</h1><div class='card'><form action='/categories' method='get'>")
+                    .append("<select name='category'>").append(options)
+                    .append("</select><button type='submit'>Filter</button></form></div><div class='grid'>");
             if (!selectedTag.isBlank()) {
                 for (Club club : clubRepository.getAllClubs()) {
-                    if (club.hasCategory(selectedTag)) html.append(buildClubCard(club, currentUser));
+                    if (club.hasCategory(selectedTag))
+                        html.append(buildClubCard(club, currentUser));
                 }
             }
             html.append("</div>");
@@ -456,8 +499,14 @@ public class WebsiteServer {
     private void handleAddClubPage(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
-            if (!currentUser.isAtLeast(User.LEVEL_UTA_STAFF)) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
+            if (!currentUser.isAtLeast(User.LEVEL_UTA_STAFF)) {
+                sendHtml(exchange, forbiddenPage(currentUser));
+                return;
+            }
 
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 Map<String, List<String>> formData = parseFormData(readRequestBody(exchange));
@@ -470,14 +519,15 @@ public class WebsiteServer {
                         getFirstValue(formData, "meetingTime"),
                         getFirstValue(formData, "ownerUsername"),
                         formData.containsKey("autoApprove"),
-                        getFirstValue(formData, "imageUrl")
-                );
+                        getFirstValue(formData, "imageUrl"));
                 String owner = getFirstValue(formData, "ownerUsername");
-                if (!owner.isBlank()) userRepository.promoteToClubPresident(owner);
+                if (!owner.isBlank())
+                    userRepository.promoteToClubPresident(owner);
                 sendRedirect(exchange, "/club?id=" + newId);
                 return;
             }
-            sendHtml(exchange, wrapPage("Add Club", currentUser, "<h1>Add Club</h1>" + clubForm("/add-club", "Add Club", null, new ArrayList<>(), true)));
+            sendHtml(exchange, wrapPage("Add Club", currentUser,
+                    "<h1>Add Club</h1>" + clubForm("/add-club", "Add Club", null, new ArrayList<>(), true)));
         } catch (SQLException e) {
             throw new IOException(e);
         }
@@ -486,7 +536,10 @@ public class WebsiteServer {
     private void handleEditClubPage(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
             boolean isStaff = currentUser.isAtLeast(User.LEVEL_UTA_STAFF);
 
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
@@ -503,30 +556,43 @@ public class WebsiteServer {
                         formData.containsKey("autoApprove"),
                         getFirstValue(formData, "imageUrl"),
                         currentUser.getUsername(),
-                        isStaff
-                );
-                if (!updated) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
+                        isStaff);
+                if (!updated) {
+                    sendHtml(exchange, forbiddenPage(currentUser));
+                    return;
+                }
                 sendRedirect(exchange, "/club?id=" + id);
                 return;
             }
 
             int id = getIntParam(exchange, "id", -1);
             Club club = clubRepository.getClubById(id);
-            if (club == null) { sendHtml(exchange, wrapPage("Not Found", currentUser, "<p>Club not found.</p>")); return; }
-            if (!isStaff && !club.isOwnedBy(currentUser.getUsername())) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
-            sendHtml(exchange, wrapPage("Edit Club", currentUser, "<h1>Edit Club</h1>" + clubForm("/edit-club", "Save Changes", club, club.getCategories(), false)));
+            if (club == null) {
+                sendHtml(exchange, wrapPage("Not Found", currentUser, "<p>Club not found.</p>"));
+                return;
+            }
+            if (!isStaff && !club.isOwnedBy(currentUser.getUsername())) {
+                sendHtml(exchange, forbiddenPage(currentUser));
+                return;
+            }
+            sendHtml(exchange, wrapPage("Edit Club", currentUser,
+                    "<h1>Edit Club</h1>" + clubForm("/edit-club", "Save Changes", club, club.getCategories(), false)));
         } catch (SQLException e) {
             throw new IOException(e);
         }
     }
 
-    private String clubForm(String action, String buttonLabel, Club existingClub, List<String> selectedTags, boolean includeOwner) {
+    private String clubForm(String action, String buttonLabel, Club existingClub, List<String> selectedTags,
+            boolean includeOwner) {
         StringBuilder checkboxes = new StringBuilder();
         for (String tag : Tags.ALL_TAGS) {
             String checked = selectedTags.contains(tag) ? " checked" : "";
-            checkboxes.append("<label class='check'><input type='checkbox' name='tags' value='").append(escapeAttribute(tag)).append("'").append(checked).append("> ").append(escape(tag)).append("</label>");
+            checkboxes.append("<label class='check'><input type='checkbox' name='tags' value='")
+                    .append(escapeAttribute(tag)).append("'").append(checked).append("> ").append(escape(tag))
+                    .append("</label>");
         }
-        String idField = existingClub != null ? "<input type='hidden' name='id' value='" + existingClub.getId() + "'>" : "";
+        String idField = existingClub != null ? "<input type='hidden' name='id' value='" + existingClub.getId() + "'>"
+                : "";
         String name = existingClub != null ? existingClub.getName() : "";
         String description = existingClub != null ? existingClub.getDescription() : "";
         String contactEmail = existingClub != null ? existingClub.getContactEmail() : "";
@@ -534,29 +600,44 @@ public class WebsiteServer {
         int members = existingClub != null ? existingClub.getMembers() : 0;
         String imageUrl = existingClub != null ? existingClub.getImageUrl() : "";
         String autoApproveChecked = existingClub != null && existingClub.isAutoApproveMembers() ? " checked" : "";
-        String ownerField = includeOwner ? "<label>Club leader username</label><input type='text' name='ownerUsername' placeholder='username'>" : "";
+        String ownerField = includeOwner
+                ? "<label>Club leader username</label><input type='text' name='ownerUsername' placeholder='username'>"
+                : "";
 
         return "<div class='card form-card'><form action='" + action + "' method='post'>"
                 + idField
-                + "<label>Club name</label><input type='text' name='name' value='" + escapeAttribute(name) + "' required>"
+                + "<label>Club name</label><input type='text' name='name' value='" + escapeAttribute(name)
+                + "' required>"
                 + ownerField
                 + "<label>Categories</label><div class='checks'>" + checkboxes + "</div>"
-                + "<label>Description</label><textarea name='description' rows='3' required>" + escape(description) + "</textarea>"
-                + "<label>Meeting time</label><input type='text' name='meetingTime' value='" + escapeAttribute(meetingTime) + "'>"
+                + "<label>Description</label><textarea name='description' rows='3' required>" + escape(description)
+                + "</textarea>"
+                + "<label>Meeting time</label><input type='text' name='meetingTime' value='"
+                + escapeAttribute(meetingTime) + "'>"
                 + "<label>Members</label><input type='number' name='members' value='" + members + "' min='0'>"
-                + "<label>Contact email</label><input type='email' name='contactEmail' value='" + escapeAttribute(contactEmail) + "' required>"
-                + "<label>Club picture URL</label><input type='url' name='imageUrl' value='" + escapeAttribute(imageUrl) + "' placeholder='Paste image link here'>"
-                + "<label class='check'><input type='checkbox' name='autoApprove'" + autoApproveChecked + "> Auto-approve join requests</label>"
+                + "<label>Contact email</label><input type='email' name='contactEmail' value='"
+                + escapeAttribute(contactEmail) + "' required>"
+                + "<label>Club picture URL</label><input type='url' name='imageUrl' value='" + escapeAttribute(imageUrl)
+                + "' placeholder='Paste image link here'>"
+                + "<label class='check'><input type='checkbox' name='autoApprove'" + autoApproveChecked
+                + "> Auto-approve join requests</label>"
                 + "<button type='submit'>" + buttonLabel + "</button></form></div>";
     }
 
     private void handleDeleteClub(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
             int id = parseIntOrZero(getFirstValue(parseFormData(readRequestBody(exchange)), "id"));
-            boolean deleted = clubRepository.deleteClub(id, currentUser.getUsername(), currentUser.isAtLeast(User.LEVEL_UTA_STAFF));
-            if (!deleted) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
+            boolean deleted = clubRepository.deleteClub(id, currentUser.getUsername(),
+                    currentUser.isAtLeast(User.LEVEL_UTA_STAFF));
+            if (!deleted) {
+                sendHtml(exchange, forbiddenPage(currentUser));
+                return;
+            }
             sendRedirect(exchange, "/clubs");
         } catch (SQLException e) {
             throw new IOException(e);
@@ -566,7 +647,10 @@ public class WebsiteServer {
     private void handleJoinClub(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
             int clubId = parseIntOrZero(getFirstValue(parseFormData(readRequestBody(exchange)), "clubId"));
             clubRepository.requestToJoin(clubId, currentUser.getUsername());
             sendRedirect(exchange, "/club?id=" + clubId);
@@ -578,7 +662,10 @@ public class WebsiteServer {
     private void handleLeaveClub(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
             int clubId = parseIntOrZero(getFirstValue(parseFormData(readRequestBody(exchange)), "clubId"));
             clubRepository.leaveClub(clubId, currentUser.getUsername());
             sendRedirect(exchange, "/club?id=" + clubId);
@@ -590,17 +677,29 @@ public class WebsiteServer {
     private void handleJoinRequestsPage(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
-            if (!currentUser.isAtLeast(User.LEVEL_CLUB_PRESIDENT)) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
+            if (!currentUser.isAtLeast(User.LEVEL_CLUB_PRESIDENT)) {
+                sendHtml(exchange, forbiddenPage(currentUser));
+                return;
+            }
 
-            List<ClubRepository.JoinRequest> requests = clubRepository.getJoinRequestsForUser(currentUser.getUsername(), currentUser.isAtLeast(User.LEVEL_UTA_STAFF));
+            List<ClubRepository.JoinRequest> requests = clubRepository.getJoinRequestsForUser(currentUser.getUsername(),
+                    currentUser.isAtLeast(User.LEVEL_UTA_STAFF));
             StringBuilder html = new StringBuilder("<h1>Join Requests</h1>");
-            if (requests.isEmpty()) html.append("<div class='card'><p>No pending requests.</p></div>");
+            if (requests.isEmpty())
+                html.append("<div class='card'><p>No pending requests.</p></div>");
             for (ClubRepository.JoinRequest request : requests) {
                 html.append("<div class='card'><h2>").append(escape(request.getClubName())).append("</h2>")
                         .append("<p>User: ").append(escape(request.getUsername())).append("</p>")
-                        .append("<form style='display:inline' action='/approve-request' method='post'><input type='hidden' name='requestId' value='").append(escapeAttribute(request.getRequestId())).append("'><button type='submit'>Approve</button></form> ")
-                        .append("<form style='display:inline' action='/deny-request' method='post'><input type='hidden' name='requestId' value='").append(escapeAttribute(request.getRequestId())).append("'><button class='danger' type='submit'>Deny</button></form></div>");
+                        .append("<form style='display:inline' action='/approve-request' method='post'><input type='hidden' name='requestId' value='")
+                        .append(escapeAttribute(request.getRequestId()))
+                        .append("'><button type='submit'>Approve</button></form> ")
+                        .append("<form style='display:inline' action='/deny-request' method='post'><input type='hidden' name='requestId' value='")
+                        .append(escapeAttribute(request.getRequestId()))
+                        .append("'><button class='danger' type='submit'>Deny</button></form></div>");
             }
             sendHtml(exchange, wrapPage("Join Requests", currentUser, html.toString()));
         } catch (SQLException e) {
@@ -619,10 +718,17 @@ public class WebsiteServer {
     private void handleRequestDecision(HttpExchange exchange, boolean approve) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
             String requestId = getFirstValue(parseFormData(readRequestBody(exchange)), "requestId");
-            if (approve) clubRepository.approveJoinRequest(requestId, currentUser.getUsername(), currentUser.isAtLeast(User.LEVEL_UTA_STAFF));
-            else clubRepository.denyJoinRequest(requestId, currentUser.getUsername(), currentUser.isAtLeast(User.LEVEL_UTA_STAFF));
+            if (approve)
+                clubRepository.approveJoinRequest(requestId, currentUser.getUsername(),
+                        currentUser.isAtLeast(User.LEVEL_UTA_STAFF));
+            else
+                clubRepository.denyJoinRequest(requestId, currentUser.getUsername(),
+                        currentUser.isAtLeast(User.LEVEL_UTA_STAFF));
             sendRedirect(exchange, "/join-requests");
         } catch (SQLException e) {
             throw new IOException(e);
@@ -632,17 +738,27 @@ public class WebsiteServer {
     private void handleAddEventPage(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
-            if (!currentUser.isAtLeast(User.LEVEL_CLUB_PRESIDENT)) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
+            if (!currentUser.isAtLeast(User.LEVEL_CLUB_PRESIDENT)) {
+                sendHtml(exchange, forbiddenPage(currentUser));
+                return;
+            }
 
             boolean isStaff = currentUser.isAtLeast(User.LEVEL_UTA_STAFF);
-            List<Club> ownedClubs = isStaff ? clubRepository.getAllClubs() : clubRepository.getClubsOwnedBy(currentUser.getUsername());
+            List<Club> ownedClubs = isStaff ? clubRepository.getAllClubs()
+                    : clubRepository.getClubsOwnedBy(currentUser.getUsername());
 
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 Map<String, List<String>> formData = parseFormData(readRequestBody(exchange));
                 int clubId = parseIntOrZero(getFirstValue(formData, "clubId"));
                 boolean allowed = isStaff || ownedClubs.stream().anyMatch(c -> c.getId() == clubId);
-                if (!allowed) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
+                if (!allowed) {
+                    sendHtml(exchange, forbiddenPage(currentUser));
+                    return;
+                }
 
                 eventRepository.addEvent(
                         getFirstValue(formData, "title"),
@@ -651,20 +767,23 @@ public class WebsiteServer {
                         getFirstValue(formData, "location"),
                         getFirstValue(formData, "description"),
                         getFirstValue(formData, "contactEmail"),
-                        getFirstValue(formData, "rsvpCapacity").isBlank() ? null : parseIntOrZero(getFirstValue(formData, "rsvpCapacity")),
-                        getFirstValue(formData, "imageUrl")
-                );
+                        getFirstValue(formData, "rsvpCapacity").isBlank() ? null
+                                : parseIntOrZero(getFirstValue(formData, "rsvpCapacity")),
+                        getFirstValue(formData, "imageUrl"));
                 sendRedirect(exchange, "/events");
                 return;
             }
 
             if (ownedClubs.isEmpty()) {
-                sendHtml(exchange, wrapPage("Add Event", currentUser, "<h1>Add Event</h1><div class='card'><p>You do not lead any clubs yet.</p></div>"));
+                sendHtml(exchange, wrapPage("Add Event", currentUser,
+                        "<h1>Add Event</h1><div class='card'><p>You do not lead any clubs yet.</p></div>"));
                 return;
             }
 
             StringBuilder options = new StringBuilder();
-            for (Club club : ownedClubs) options.append("<option value='").append(club.getId()).append("'>").append(escape(club.getName())).append("</option>");
+            for (Club club : ownedClubs)
+                options.append("<option value='").append(club.getId()).append("'>").append(escape(club.getName()))
+                        .append("</option>");
             String form = "<div class='card form-card'><form action='/add-event' method='post'>"
                     + "<label>Club</label><select name='clubId'>" + options + "</select>"
                     + "<label>Event title</label><input type='text' name='title' required>"
@@ -684,22 +803,33 @@ public class WebsiteServer {
     private void handleEventImagePage(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
             boolean isStaff = currentUser.isAtLeast(User.LEVEL_UTA_STAFF);
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 Map<String, List<String>> formData = parseFormData(readRequestBody(exchange));
                 int id = parseIntOrZero(getFirstValue(formData, "id"));
-                boolean updated = eventRepository.updateEventImage(id, getFirstValue(formData, "imageUrl"), currentUser.getUsername(), isStaff);
-                if (!updated) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
+                boolean updated = eventRepository.updateEventImage(id, getFirstValue(formData, "imageUrl"),
+                        currentUser.getUsername(), isStaff);
+                if (!updated) {
+                    sendHtml(exchange, forbiddenPage(currentUser));
+                    return;
+                }
                 sendRedirect(exchange, "/events");
                 return;
             }
             int id = getIntParam(exchange, "id", -1);
             Event event = eventRepository.getEventById(id);
-            if (event == null) { sendHtml(exchange, wrapPage("Not Found", currentUser, "<p>Event not found.</p>")); return; }
+            if (event == null) {
+                sendHtml(exchange, wrapPage("Not Found", currentUser, "<p>Event not found.</p>"));
+                return;
+            }
             String form = "<div class='card form-card'><form action='/event-image' method='post'>"
                     + "<input type='hidden' name='id' value='" + event.getId() + "'>"
-                    + "<label>Event picture URL</label><input type='url' name='imageUrl' value='" + escapeAttribute(event.getImageUrl()) + "'>"
+                    + "<label>Event picture URL</label><input type='url' name='imageUrl' value='"
+                    + escapeAttribute(event.getImageUrl()) + "'>"
                     + "<button type='submit'>Save Picture</button></form></div>";
             sendHtml(exchange, wrapPage("Change Event Picture", currentUser, "<h1>Change Event Picture</h1>" + form));
         } catch (SQLException e) {
@@ -710,7 +840,10 @@ public class WebsiteServer {
     private void handleRsvp(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
             int eventId = parseIntOrZero(getFirstValue(parseFormData(readRequestBody(exchange)), "eventId"));
             eventRepository.rsvp(eventId, currentUser.getUsername());
             sendRedirect(exchange, "/events");
@@ -722,8 +855,14 @@ public class WebsiteServer {
     private void handlePromotePage(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
-            if (!currentUser.isAtLeast(User.LEVEL_UTA_STAFF)) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
+            if (!currentUser.isAtLeast(User.LEVEL_UTA_STAFF)) {
+                sendHtml(exchange, forbiddenPage(currentUser));
+                return;
+            }
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 String username = getFirstValue(parseFormData(readRequestBody(exchange)), "username");
                 userRepository.promoteToClubPresident(username);
@@ -733,7 +872,8 @@ public class WebsiteServer {
             StringBuilder html = new StringBuilder("<h1>Promote Members</h1>");
             for (User student : userRepository.findAllStudents()) {
                 html.append("<div class='card'><p>").append(escape(student.getUsername())).append("</p>")
-                        .append("<form action='/promote' method='post'><input type='hidden' name='username' value='").append(escapeAttribute(student.getUsername())).append("'>")
+                        .append("<form action='/promote' method='post'><input type='hidden' name='username' value='")
+                        .append(escapeAttribute(student.getUsername())).append("'>")
                         .append("<button type='submit'>Promote to Club Leader</button></form></div>");
             }
             sendHtml(exchange, wrapPage("Promote", currentUser, html.toString()));
@@ -745,8 +885,14 @@ public class WebsiteServer {
     private void handleAssignLeaderPage(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
-            if (!currentUser.isAtLeast(User.LEVEL_UTA_STAFF)) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
+            if (!currentUser.isAtLeast(User.LEVEL_UTA_STAFF)) {
+                sendHtml(exchange, forbiddenPage(currentUser));
+                return;
+            }
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 Map<String, List<String>> formData = parseFormData(readRequestBody(exchange));
                 int clubId = parseIntOrZero(getFirstValue(formData, "clubId"));
@@ -757,7 +903,9 @@ public class WebsiteServer {
                 return;
             }
             StringBuilder options = new StringBuilder();
-            for (Club club : clubRepository.getAllClubs()) options.append("<option value='").append(club.getId()).append("'>").append(escape(club.getName())).append("</option>");
+            for (Club club : clubRepository.getAllClubs())
+                options.append("<option value='").append(club.getId()).append("'>").append(escape(club.getName()))
+                        .append("</option>");
             String form = "<h1>Assign Club Leader</h1><div class='card form-card'><form action='/assign-leader' method='post'>"
                     + "<label>Club</label><select name='clubId'>" + options + "</select>"
                     + "<label>Leader username</label><input type='text' name='username' required>"
@@ -771,8 +919,14 @@ public class WebsiteServer {
     private void handleSiteSettingsPage(HttpExchange exchange) throws IOException {
         try {
             User currentUser = getCurrentUser(exchange);
-            if (currentUser == null) { sendRedirect(exchange, "/login"); return; }
-            if (!currentUser.isAtLeast(User.LEVEL_UTA_STAFF)) { sendHtml(exchange, forbiddenPage(currentUser)); return; }
+            if (currentUser == null) {
+                sendRedirect(exchange, "/login");
+                return;
+            }
+            if (!currentUser.isAtLeast(User.LEVEL_UTA_STAFF)) {
+                sendHtml(exchange, forbiddenPage(currentUser));
+                return;
+            }
             if (exchange.getRequestMethod().equalsIgnoreCase("POST")) {
                 String imageUrl = getFirstValue(parseFormData(readRequestBody(exchange)), "heroImageUrl");
                 saveHomeHeroImage(imageUrl);
@@ -780,7 +934,8 @@ public class WebsiteServer {
                 return;
             }
             String form = "<h1>Home Page Background</h1><div class='card form-card'><form action='/site-settings' method='post'>"
-                    + "<label>Background image URL</label><input type='url' name='heroImageUrl' value='" + escapeAttribute(getHomeHeroImage()) + "' placeholder='Paste image link here'>"
+                    + "<label>Background image URL</label><input type='url' name='heroImageUrl' value='"
+                    + escapeAttribute(getHomeHeroImage()) + "' placeholder='Paste image link here'>"
                     + "<button type='submit'>Save Image</button></form></div>";
             sendHtml(exchange, wrapPage("Site Settings", currentUser, form));
         } catch (SQLException e) {
@@ -792,7 +947,8 @@ public class WebsiteServer {
         try {
             Firestore db = FirebaseService.getDatabase();
             DocumentSnapshot doc = db.collection("site_settings").document("home").get().get();
-            if (!doc.exists()) return "";
+            if (!doc.exists())
+                return "";
             String image = doc.getString("heroImageUrl");
             return image == null ? "" : image;
         } catch (Exception e) {
@@ -812,37 +968,677 @@ public class WebsiteServer {
     }
 
     private String forbiddenPage(User user) {
-        return wrapPage("Forbidden", user, "<div class='card'><h1>Access Denied</h1><p>You do not have permission to do this.</p></div>");
+        return wrapPage("Forbidden", user,
+                "<div class='card'><h1>Access Denied</h1><p>You do not have permission to do this.</p></div>");
     }
 
     private String wrapPage(String title, User currentUser, String body) {
         String authLinks = currentUser == null
-                ? "<a href='/login'>Login</a><a class='btn-small' href='/register'>Register</a>"
-                : "<a href='/dashboard'>" + escape(currentUser.getUsername()) + " (" + currentUser.getRoleName() + ")</a><a class='btn-small' href='/logout'>Logout</a>";
+                ? "<a href='/login'>Login</a>"
+                        + "<a class='btn-small' href='/register'>Register</a>"
+                : "<a href='/dashboard'>"
+                        + escape(currentUser.getUsername())
+                        + " (" + currentUser.getRoleName() + ")</a>"
+                        + "<a class='btn-small' href='/logout'>Logout</a>";
 
-        return "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>" + escape(title) + "</title>" + styles() + "</head><body>"
-                + "<nav class='topbar'><a class='brand' href='/'>UTA Club Connect</a><div class='navlinks'>"
-                + "<a href='/clubs'>Clubs</a><a href='/events'>Events</a><a href='/search'>Search</a><a href='/categories'>Categories</a>"
-                + "</div><div class='authlinks'>" + authLinks + "</div></nav>"
-                + "<main>" + body + "</main></body></html>";
+        return "<!DOCTYPE html>"
+                + "<html lang='en'>"
+                + "<head>"
+                + "<meta charset='UTF-8'>"
+                + "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                + "<title>" + escape(title) + " | UTA Club Connect</title>"
+                + styles()
+                + "</head>"
+                + "<body>"
+
+                + "<nav class='topbar'>"
+                + "<a class='brand' href='/'>UTA Club Connect</a>"
+
+                + "<div class='navlinks'>"
+                + "<a href='/clubs'>Clubs</a>"
+                + "<a href='/events'>Events</a>"
+                + "<a href='/search'>Search</a>"
+                + "<a href='/categories'>Categories</a>"
+                + "</div>"
+
+                + "<div class='authlinks'>"
+                + authLinks
+                + "</div>"
+                + "</nav>"
+
+                + "<main>" + body + "</main>"
+
+                + "<footer>"
+                + "<p>UTA Club Connect</p>"
+                + "<p>Discover clubs, events, and student organizations at UTA.</p>"
+                + "</footer>"
+
+                + "</body>"
+                + "</html>";
     }
 
     private String styles() {
-        return "<style>"
-                + "*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f7fb;color:#102033}a{color:#0067b1;text-decoration:none}"
-                + ".topbar{height:64px;background:white;display:flex;align-items:center;justify-content:space-between;padding:0 38px;box-shadow:0 1px 8px rgba(0,0,0,.08);position:sticky;top:0;z-index:10}.brand{font-weight:800;font-size:24px;color:#0b4f86}.navlinks a,.authlinks a{margin:0 10px;color:#102033}.btn-small{background:#0067b1;color:white!important;padding:10px 16px;border-radius:8px}"
-                + "main{max-width:1280px;margin:0 auto;padding:28px}.hero{margin:-28px calc(50% - 50vw) 28px;min-height:390px;background:linear-gradient(135deg,#0072bc,#23415f);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center}.hero-box{width:min(900px,90%);background:rgba(8,31,52,.86);border-radius:10px;padding:44px;text-align:center;color:white}.hero h1{font-size:40px;margin:0 0 28px}.hero-search{display:flex;background:white;border-radius:8px;padding:14px;gap:10px}.hero-search input{flex:1;border:0;font-size:18px;padding:14px;outline:0}.hero-search button,button{background:#0067b1;color:white;border:0;padding:12px 18px;border-radius:7px;cursor:pointer}.tiny-counts{font-size:14px;margin:12px 0 0;color:#dbeafe}"
-                + ".home-section{margin:34px 0}.section-header{display:flex;justify-content:space-between;align-items:center}.scroll-row{display:flex;gap:18px;overflow-x:auto;padding-bottom:14px}.media-card{min-width:280px;max-width:280px;background:white;border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.08);overflow:hidden;color:#102033}.media-card img{width:100%;height:150px;object-fit:cover}.media-card div{padding:14px}.media-card h3{margin:0 0 8px}"
-                + ".grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}.card{background:white;border:1px solid #d7e0ea;border-radius:12px;padding:20px;margin:16px 0;box-shadow:0 1px 6px rgba(0,0,0,.04)}.card-img{width:100%;height:170px;object-fit:cover;border-radius:10px;margin-bottom:12px}.status{color:#047857;font-weight:bold}.error{color:#b91c1c}.danger{background:#b91c1c}.secondary{background:#e8eef5;color:#102033}.tools{margin-top:14px;border-top:1px solid #e5e7eb;padding-top:12px}.tools a{margin-right:12px}"
-                + ".form-card form,.auth-card form{display:flex;flex-direction:column;gap:10px}.form-card input,.form-card textarea,.form-card select,.auth-card input,.card input,.card select{padding:12px;border:1px solid #cbd5e1;border-radius:8px;font-size:15px}.checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}.check{font-size:14px}.action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}.action-card{display:block;background:white;border:1px solid #d7e0ea;border-radius:12px;padding:22px;color:#102033}.action-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.12)}"
-                + "</style>";
+        return """
+                <style>
+                    * {
+                        box-sizing: border-box;
+                    }
+
+                    html {
+                        scroll-behavior: smooth;
+                    }
+
+                    body {
+                        margin: 0;
+                        font-family: Arial, Helvetica, sans-serif;
+                        background: #f4f7fb;
+                        color: #102033;
+                        line-height: 1.6;
+                        overflow-x: hidden;
+                    }
+
+                    img {
+                        max-width: 100%;
+                        display: block;
+                    }
+
+                    a {
+                        color: #0067b1;
+                        text-decoration: none;
+                    }
+
+                    h1,
+                    h2,
+                    h3 {
+                        line-height: 1.25;
+                    }
+
+
+
+                    .topbar {
+                        min-height: 64px;
+                        background: white;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 20px;
+                        padding: 10px 38px;
+                        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
+                        position: sticky;
+                        top: 0;
+                        z-index: 1000;
+                    }
+
+                    .brand {
+                        color: #0b4f86;
+                        font-size: 23px;
+                        font-weight: 800;
+                        white-space: nowrap;
+                    }
+
+                    .navlinks,
+                    .authlinks {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                    }
+
+                    .navlinks a,
+                    .authlinks a {
+                        color: #102033;
+                        padding: 9px 10px;
+                        border-radius: 7px;
+                        transition: background-color 0.2s ease;
+                    }
+
+                    .navlinks a:hover,
+                    .authlinks a:hover {
+                        background: #edf5fb;
+                    }
+
+                    .btn-small {
+                        background: #0067b1;
+                        color: white !important;
+                        padding: 10px 16px !important;
+                        border-radius: 8px;
+                    }
+
+
+
+                    main {
+                        width: 100%;
+                        max-width: 1280px;
+                        margin: 0 auto;
+                        padding: 28px;
+                        min-height: calc(100vh - 180px);
+                    }
+
+
+
+                    .hero {
+                        margin: -28px calc(50% - 50vw) 28px;
+                        min-height: 390px;
+                        padding: 40px 20px;
+                        background:
+                            linear-gradient(135deg, #0072bc, #23415f);
+                        background-size: cover;
+                        background-position: center;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .hero-box {
+                        width: min(900px, 92%);
+                        background: rgba(8, 31, 52, 0.86);
+                        border-radius: 14px;
+                        padding: 44px;
+                        text-align: center;
+                        color: white;
+                        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+                    }
+
+                    .hero h1 {
+                        font-size: clamp(30px, 5vw, 48px);
+                        margin: 0 0 28px;
+                    }
+
+                    .hero-search {
+                        display: flex;
+                        background: white;
+                        border-radius: 10px;
+                        padding: 10px;
+                        gap: 10px;
+                    }
+
+                    .hero-search input {
+                        flex: 1;
+                        min-width: 0;
+                        border: none;
+                        font-size: 17px;
+                        padding: 14px;
+                        outline: none;
+                    }
+
+                    .tiny-counts {
+                        font-size: 14px;
+                        margin: 14px 0 0;
+                        color: #dbeafe;
+                    }
+
+
+
+                    button {
+                        background: #0067b1;
+                        color: white;
+                        border: none;
+                        padding: 12px 18px;
+                        border-radius: 7px;
+                        cursor: pointer;
+                        font-size: 15px;
+                        font-weight: 600;
+                        transition:
+                            background-color 0.2s ease,
+                            transform 0.2s ease;
+                    }
+
+                    button:hover {
+                        background: #004f8c;
+                        transform: translateY(-1px);
+                    }
+
+                    button:active {
+                        transform: translateY(0);
+                    }
+
+                    .danger {
+                        background: #b91c1c;
+                    }
+
+                    .danger:hover {
+                        background: #991b1b;
+                    }
+
+                    .secondary {
+                        background: #e8eef5;
+                        color: #102033;
+                    }
+
+
+
+                    .home-section {
+                        margin: 36px 0;
+                    }
+
+                    .section-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        gap: 16px;
+                        margin-bottom: 16px;
+                    }
+
+                    .section-header h2 {
+                        margin: 0;
+                    }
+
+                    .scroll-row {
+                        display: flex;
+                        gap: 18px;
+                        overflow-x: auto;
+                        padding: 4px 2px 18px;
+                        scroll-snap-type: x mandatory;
+                        -webkit-overflow-scrolling: touch;
+                    }
+
+                    .scroll-row::-webkit-scrollbar {
+                        height: 8px;
+                    }
+
+                    .scroll-row::-webkit-scrollbar-thumb {
+                        background: #b9c8d8;
+                        border-radius: 20px;
+                    }
+
+                    .media-card {
+                        flex: 0 0 280px;
+                        width: 280px;
+                        background: white;
+                        border-radius: 12px;
+                        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
+                        overflow: hidden;
+                        color: #102033;
+                        scroll-snap-align: start;
+                        transition:
+                            transform 0.2s ease,
+                            box-shadow 0.2s ease;
+                    }
+
+                    .media-card:hover {
+                        transform: translateY(-4px);
+                        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+                    }
+
+                    .media-card img {
+                        width: 100%;
+                        height: 150px;
+                        object-fit: cover;
+                    }
+
+                    .media-card div {
+                        padding: 14px;
+                    }
+
+                    .media-card h3 {
+                        margin: 0 0 8px;
+                    }
+
+
+
+                    .grid {
+                        display: grid;
+                        grid-template-columns:
+                            repeat(auto-fit, minmax(280px, 1fr));
+                        gap: 20px;
+                    }
+
+                    .card {
+                        background: white;
+                        border: 1px solid #d7e0ea;
+                        border-radius: 12px;
+                        padding: 20px;
+                        margin: 16px 0;
+                        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+                        overflow-wrap: anywhere;
+                    }
+
+                    .grid .card {
+                        margin: 0;
+                    }
+
+                    .card-img {
+                        width: 100%;
+                        height: 190px;
+                        object-fit: cover;
+                        border-radius: 10px;
+                        margin-bottom: 12px;
+                    }
+
+                    .status {
+                        color: #047857;
+                        font-weight: bold;
+                    }
+
+                    .error {
+                        color: #b91c1c;
+                        font-weight: 600;
+                    }
+
+                    .tools {
+                        display: flex;
+                        align-items: center;
+                        flex-wrap: wrap;
+                        gap: 10px;
+                        margin-top: 14px;
+                        border-top: 1px solid #e5e7eb;
+                        padding-top: 12px;
+                    }
+
+                    .tools a {
+                        margin-right: 4px;
+                    }
+
+
+
+                    .form-card {
+                        max-width: 760px;
+                        margin-left: auto;
+                        margin-right: auto;
+                    }
+
+                    .auth-card {
+                        max-width: 460px;
+                        margin-left: auto;
+                        margin-right: auto;
+                    }
+
+                    .form-card form,
+                    .auth-card form {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+
+                    label {
+                        font-weight: 600;
+                    }
+
+                    input,
+                    textarea,
+                    select {
+                        width: 100%;
+                        max-width: 100%;
+                        padding: 12px;
+                        border: 1px solid #cbd5e1;
+                        border-radius: 8px;
+                        font-family: inherit;
+                        font-size: 16px;
+                        background: white;
+                    }
+
+                    input:focus,
+                    textarea:focus,
+                    select:focus {
+                        outline: none;
+                        border-color: #0067b1;
+                        box-shadow: 0 0 0 3px rgba(0, 103, 177, 0.15);
+                    }
+
+                    textarea {
+                        resize: vertical;
+                    }
+
+                    .checks {
+                        display: grid;
+                        grid-template-columns:
+                            repeat(auto-fit, minmax(160px, 1fr));
+                        gap: 10px;
+                        margin-bottom: 10px;
+                    }
+
+                    .check {
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        font-size: 14px;
+                        font-weight: normal;
+                    }
+
+                    .check input {
+                        width: auto;
+                        margin: 0;
+                    }
+
+
+
+                    .action-grid {
+                        display: grid;
+                        grid-template-columns:
+                            repeat(auto-fit, minmax(230px, 1fr));
+                        gap: 18px;
+                    }
+
+                    .action-card {
+                        display: block;
+                        background: white;
+                        border: 1px solid #d7e0ea;
+                        border-radius: 12px;
+                        padding: 22px;
+                        color: #102033;
+                        transition:
+                            transform 0.2s ease,
+                            box-shadow 0.2s ease;
+                    }
+
+                    .action-card:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+                    }
+
+
+
+                    footer {
+                        background: #0f3050;
+                        color: white;
+                        text-align: center;
+                        padding: 24px 18px;
+                        margin-top: 40px;
+                    }
+
+                    footer p {
+                        margin: 4px 0;
+                    }
+
+
+
+                    @media (max-width: 900px) {
+                        .topbar {
+                            flex-wrap: wrap;
+                            justify-content: center;
+                            padding: 12px 20px;
+                        }
+
+                        .brand {
+                            width: 100%;
+                            text-align: center;
+                        }
+
+                        .navlinks,
+                        .authlinks {
+                            justify-content: center;
+                            flex-wrap: wrap;
+                        }
+
+                        main {
+                            padding: 22px;
+                        }
+
+                        .hero {
+                            margin-top: -22px;
+                        }
+
+                        .hero-box {
+                            padding: 34px 24px;
+                        }
+                    }
+
+
+
+                    @media (max-width: 600px) {
+                        .topbar {
+                            position: static;
+                            display: block;
+                            padding: 14px 12px;
+                        }
+
+                        .brand {
+                            display: block;
+                            width: 100%;
+                            text-align: center;
+                            font-size: 21px;
+                            margin-bottom: 12px;
+                        }
+
+                        .navlinks,
+                        .authlinks {
+                            display: grid;
+                            grid-template-columns: repeat(2, 1fr);
+                            width: 100%;
+                            gap: 8px;
+                            margin-top: 8px;
+                        }
+
+                        .navlinks a,
+                        .authlinks a {
+                            display: block;
+                            width: 100%;
+                            margin: 0;
+                            padding: 10px 6px;
+                            text-align: center;
+                            background: #f1f6fa;
+                            font-size: 14px;
+                        }
+
+                        .authlinks .btn-small {
+                            display: block;
+                            width: 100%;
+                        }
+
+                        main {
+                            padding: 16px;
+                        }
+
+                        h1 {
+                            font-size: 28px;
+                        }
+
+                        h2 {
+                            font-size: 22px;
+                        }
+
+                        .hero {
+                            margin:
+                                -16px calc(50% - 50vw)
+                                24px;
+                            min-height: 330px;
+                            padding: 24px 14px;
+                        }
+
+                        .hero-box {
+                            width: 100%;
+                            padding: 28px 16px;
+                        }
+
+                        .hero h1 {
+                            font-size: 29px;
+                            margin-bottom: 20px;
+                        }
+
+                        .hero-search {
+                            flex-direction: column;
+                            padding: 8px;
+                        }
+
+                        .hero-search input,
+                        .hero-search button {
+                            width: 100%;
+                        }
+
+                        .section-header {
+                            align-items: flex-start;
+                        }
+
+                        .section-header h2 {
+                            font-size: 23px;
+                        }
+
+                        .media-card {
+                            flex-basis: 85vw;
+                            width: 85vw;
+                            min-width: 85vw;
+                        }
+
+                        .grid {
+                            grid-template-columns: 1fr;
+                            gap: 16px;
+                        }
+
+                        .card {
+                            padding: 16px;
+                        }
+
+                        .card-img {
+                            height: 180px;
+                        }
+
+                        .checks {
+                            grid-template-columns: 1fr;
+                        }
+
+                        .tools {
+                            align-items: stretch;
+                            flex-direction: column;
+                        }
+
+                        .tools a,
+                        .tools form,
+                        .tools button {
+                            width: 100%;
+                            text-align: center;
+                        }
+
+                        form button {
+                            width: 100%;
+                        }
+
+                        .action-grid {
+                            grid-template-columns: 1fr;
+                        }
+
+                        footer {
+                            padding: 22px 14px;
+                        }
+                    }
+
+
+
+                    @media (max-width: 380px) {
+                        .navlinks,
+                        .authlinks {
+                            grid-template-columns: 1fr;
+                        }
+
+                        .hero h1 {
+                            font-size: 25px;
+                        }
+
+                        .media-card {
+                            flex-basis: 88vw;
+                            width: 88vw;
+                            min-width: 88vw;
+                        }
+                    }
+                </style>
+                """;
     }
 
     private void sendHtml(HttpExchange exchange, String html) throws IOException {
         byte[] bytes = html.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
         exchange.sendResponseHeaders(200, bytes.length);
-        try (OutputStream os = exchange.getResponseBody()) { os.write(bytes); }
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(bytes);
+        }
     }
 
     private String readRequestBody(HttpExchange exchange) throws IOException {
@@ -850,13 +1646,15 @@ public class WebsiteServer {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         int length;
-        while ((length = inputStream.read(buffer)) != -1) outputStream.write(buffer, 0, length);
+        while ((length = inputStream.read(buffer)) != -1)
+            outputStream.write(buffer, 0, length);
         return outputStream.toString(StandardCharsets.UTF_8);
     }
 
     private Map<String, List<String>> parseFormData(String body) {
         Map<String, List<String>> result = new HashMap<>();
-        if (body == null || body.isBlank()) return result;
+        if (body == null || body.isBlank())
+            return result;
         for (String pair : body.split("&")) {
             String[] pieces = pair.split("=", 2);
             String key = urlDecode(pieces[0]);
@@ -882,16 +1680,22 @@ public class WebsiteServer {
 
     private String getQueryParam(HttpExchange exchange, String key) {
         String query = exchange.getRequestURI().getQuery();
-        if (query == null) return "";
+        if (query == null)
+            return "";
         for (String param : query.split("&")) {
             String[] pieces = param.split("=", 2);
-            if (urlDecode(pieces[0]).equals(key)) return pieces.length > 1 ? urlDecode(pieces[1]) : "";
+            if (urlDecode(pieces[0]).equals(key))
+                return pieces.length > 1 ? urlDecode(pieces[1]) : "";
         }
         return "";
     }
 
     private int parseIntOrZero(String text) {
-        try { return Integer.parseInt(text); } catch (Exception e) { return 0; }
+        try {
+            return Integer.parseInt(text);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     private String urlDecode(String value) {
@@ -899,8 +1703,10 @@ public class WebsiteServer {
     }
 
     private String escape(String text) {
-        if (text == null) return "";
-        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;");
+        if (text == null)
+            return "";
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'",
+                "&#39;");
     }
 
     private String escapeAttribute(String text) {
