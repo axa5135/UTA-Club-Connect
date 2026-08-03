@@ -67,14 +67,33 @@ public class ClubRepository {
                     .get().get().getDocuments();
 
             List<Club> clubs = new ArrayList<>();
-            for (QueryDocumentSnapshot doc : docs) {
-                clubs.add(buildClub(doc));
-            }
+            for (QueryDocumentSnapshot doc : docs) clubs.add(buildClub(doc));
 
             clubs.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
             return clubs;
         } catch (Exception e) {
             throw new SQLException("Could not get owned clubs from Firebase.", e);
+        }
+    }
+
+    public List<Club> getClubsJoinedBy(String username) throws SQLException {
+        try {
+            Firestore db = FirebaseService.getDatabase();
+            List<QueryDocumentSnapshot> docs = db.collection("club_members")
+                    .whereEqualTo("username", username)
+                    .get().get().getDocuments();
+
+            List<Club> clubs = new ArrayList<>();
+            for (QueryDocumentSnapshot doc : docs) {
+                int clubId = getInt(doc, "clubId");
+                Club club = getClubById(clubId);
+                if (club != null) clubs.add(club);
+            }
+
+            clubs.sort((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+            return clubs;
+        } catch (Exception e) {
+            throw new SQLException("Could not get joined clubs from Firebase.", e);
         }
     }
 
@@ -257,9 +276,9 @@ public class ClubRepository {
                     requests.add(new JoinRequest(
                             doc.getId(),
                             clubId,
-                            doc.getString("clubName"),
-                            doc.getString("username"),
-                            doc.getString("status")
+                            safe(doc.getString("clubName")),
+                            safe(doc.getString("username")),
+                            safe(doc.getString("status"))
                     ));
                 }
             }
@@ -329,6 +348,10 @@ public class ClubRepository {
             for (QueryDocumentSnapshot request : db.collection("join_requests").whereEqualTo("clubId", clubId).get().get().getDocuments()) {
                 db.collection("join_requests").document(request.getId()).delete().get();
             }
+            for (QueryDocumentSnapshot alert : db.collection("club_alerts").whereEqualTo("clubId", clubId).get().get().getDocuments()) {
+                db.collection("club_alerts").document(alert.getId()).delete().get();
+            }
+
             db.collection("clubs").document(String.valueOf(clubId)).delete().get();
             return true;
         } catch (Exception e) {

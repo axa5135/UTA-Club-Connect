@@ -26,9 +26,9 @@ public class Main {
             website.start();
             System.out.println();
             System.out.println("Test accounts (all use the password 'password123'):");
-            System.out.println("  staff_admin    - Level 3, Admin");
-            System.out.println("  robotics_pres  - Level 2, Club Leader (owns Robotics)");
-            System.out.println("  student1       - Level 1, Member");
+            System.out.println("  staff_admin    - Staff Admin, Level 3, Admin");
+            System.out.println("  robotics_pres  - Robotics President, Level 2, Club Leader");
+            System.out.println("  student1       - Student One, Level 1, Member");
             System.out.println();
             System.out.println("Press Ctrl+C to stop the server.");
         } catch (Exception error) {
@@ -42,9 +42,9 @@ public class Main {
             return;
         }
 
-        userRepository.createUser("staff_admin", "password123", User.LEVEL_UTA_STAFF);
-        userRepository.createUser("robotics_pres", "password123", User.LEVEL_CLUB_PRESIDENT);
-        userRepository.createUser("student1", "password123", User.LEVEL_STUDENT);
+        userRepository.createUser("staff_admin", "Staff Admin", "password123", User.LEVEL_UTA_STAFF);
+        userRepository.createUser("robotics_pres", "Robotics President", "password123", User.LEVEL_CLUB_PRESIDENT);
+        userRepository.createUser("student1", "Student One", "password123", User.LEVEL_STUDENT);
 
         int roboticsId = clubRepository.addClub(
                 "Robotics",
